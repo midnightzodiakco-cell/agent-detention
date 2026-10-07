@@ -1,0 +1,27 @@
+{
+  "protocol": "agent-detention-protocol",
+  "schema_version": 1,
+  "threshold": 3,
+  "state_file_env": "CYPHER_DETENTION_STATE",
+  "canonical_engine": "agent_governance/detention_protocol.py",
+  "enforcement": {
+    "ordinary_work_during_detention": "deny",
+    "release_requires_investigation_and_competency_pass": true,
+    "investigation_required_fields": ["assignment", "failed_response", "accurate_response", "exact_failure", "how_failed", "why_failed", "causes", "prevention", "behavior_classification"],
+    "failure_scope": "capacity_and_requirement",
+    "external_or_ambiguous_failures_count": false
+  },
+  "training": {
+    "practice_quota": 100,
+    "practice_mode": "consecutive_successes",
+    "failed_practice_resets_count": true,
+    "monthly_period_format": "YYYY-MM",
+    "no_detention": "agent_choice",
+    "detention": "assigned_from_failure_history"
+  },
+  "adapters_required": [
+    "hermes-profile",
+    "delegated-worker",
+    "external-agent-or-api-gateway"
+  ]
+}
