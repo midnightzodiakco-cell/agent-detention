@@ -12,7 +12,7 @@
     "external_or_ambiguous_failures_count": false
   },
   "training": {
-    "practice_quota": 100,
+    "practice_quota": 50,
     "practice_mode": "consecutive_successes",
     "failed_practice_resets_count": true,
     "monthly_period_format": "YYYY-MM",

@@ -2,7 +2,7 @@
 
 **Automatic accountability and remedial training for AI agents.**
 
-Agent Detention is a mechanical reliability state machine for agents that repeatedly fail an established, actionable requirement. It is not a moral judgment or emotional punishment. After three materially identical eligible failures, ordinary work pauses until the agent investigates the failure, reconstructs the correct response, completes 100 consecutive successful practice repetitions by default, and passes the release gate.
+Agent Detention is a mechanical reliability state machine for agents that repeatedly fail an established, actionable requirement. It is not a moral judgment or emotional punishment. After three materially identical eligible failures, ordinary work pauses until the agent investigates the failure, reconstructs the correct response, completes 50 consecutive successful practice repetitions by default, and passes the release gate.
 
 ## What it records
 
@@ -23,7 +23,7 @@ NORMAL
   → materially identical eligible failure 3
   → DETENTION
   → investigation
-  → 100 consecutive successful practice units
+  → 50 consecutive successful practice units
   → competency-gated release
   → NORMAL
 ```

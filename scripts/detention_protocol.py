@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 THRESHOLD = 3
-PRACTICE_QUOTA = 100
+PRACTICE_QUOTA = 50
 DEFAULT_STATE = {
     "schema_version": 1,
     "agents": {},
@@ -34,7 +34,18 @@ def load(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text())
     if data.get("schema_version") != 1:
         raise ValueError("unsupported detention state schema")
+    migrate_active_detentions(data)
     return data
+
+def migrate_active_detentions(data: dict[str, Any]) -> int:
+    """Apply the current practice quota without changing completed repetitions."""
+    changed = 0
+    for a in data.get("agents", {}).values():
+        for d in a.get("detentions", []):
+            if d.get("status") == "ACTIVE" and d.get("practice_quota") != PRACTICE_QUOTA:
+                d["practice_quota"] = PRACTICE_QUOTA
+                changed += 1
+    return changed
 
 def save(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -115,6 +126,13 @@ def monthly(path: Path, name: str, period: str, choice: str | None = None) -> di
     plan={"agent":name,"period":period,"mode":"ASSIGNED" if assigned else "FREE_CHOICE","subjects":sorted(set(assigned)) if assigned else ([choice] if choice else [])}
     data["monthly"][f"{name}:{period}"]=plan; save(path,data); return plan
 
+def migrate_policy(path: Path) -> dict[str, Any]:
+    data = load(path)
+    changed = migrate_active_detentions(data)
+    save(path, data)
+    active = sum(1 for a in data.get("agents", {}).values() for d in a.get("detentions", []) if d.get("status") == "ACTIVE")
+    return {"practice_quota": PRACTICE_QUOTA, "active_detentions_updated": changed, "active_detentions": active}
+
 def main() -> None:
     p=argparse.ArgumentParser(); p.add_argument("--state",default=str(state_path())); sub=p.add_subparsers(dest="cmd",required=True)
     f=sub.add_parser("failure"); f.add_argument("agent"); f.add_argument("capacity"); f.add_argument("requirement"); f.add_argument("expected"); f.add_argument("observed"); f.add_argument("--evidence",default=""); f.add_argument("--ineligible",action="store_true")
@@ -124,6 +142,7 @@ def main() -> None:
     pr=sub.add_parser("practice"); pr.add_argument("agent"); pr.add_argument("detention_id"); pr.add_argument("result",choices=["PASS","FAIL"]); pr.add_argument("--evidence",default="")
     r=sub.add_parser("release"); r.add_argument("agent"); r.add_argument("detention_id")
     m=sub.add_parser("monthly"); m.add_argument("agent"); m.add_argument("period"); m.add_argument("--choice")
+    mp=sub.add_parser("migrate-policy")
     a=p.parse_args(); path=Path(a.state)
     if a.cmd=="failure": out=record_failure(path,a.agent,a.capacity,a.requirement,a.expected,a.observed,a.evidence,not a.ineligible)
     elif a.cmd=="success": out=record_success(path,a.agent,a.capacity,a.requirement,a.evidence)
@@ -131,7 +150,8 @@ def main() -> None:
     elif a.cmd=="investigate": out=investigate(path,a.agent,a.detention_id,a.assignment,a.failed_response,a.accurate_response,a.exact_failure,a.how_failed,a.why_failed,a.causes,a.prevention,a.behavior_classification)
     elif a.cmd=="practice": out=practice(path,a.agent,a.detention_id,a.result,a.evidence)
     elif a.cmd=="release": out=release(path,a.agent,a.detention_id)
-    else: out=monthly(path,a.agent,a.period,a.choice)
+    elif a.cmd=="monthly": out=monthly(path,a.agent,a.period,a.choice)
+    else: out=migrate_policy(path)
     print(json.dumps(out,indent=2,sort_keys=True))
 
 if __name__ == "__main__": main()

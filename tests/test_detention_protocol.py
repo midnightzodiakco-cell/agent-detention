@@ -43,10 +43,23 @@ class DetentionProtocolTests(unittest.TestCase):
         with self.assertRaises(ValueError): mod.release(self.path, "agent", "DET-0001")
         with self.assertRaises(ValueError): mod.practice(self.path, "agent", "DET-0001", "PASS")
         mod.investigate(self.path, "agent", "DET-0001", "assignment", "failed response", "accurate response", "exact", "how", "why", "causes", "prevention", "overwrote")
-        for _ in range(99): mod.practice(self.path, "agent", "DET-0001", "PASS")
+        for _ in range(49): mod.practice(self.path, "agent", "DET-0001", "PASS")
         self.assertNotEqual(mod.status(self.path, "agent")["detentions"][0].get("competency"), "PASS")
         mod.practice(self.path, "agent", "DET-0001", "PASS")
         self.assertEqual(mod.release(self.path, "agent", "DET-0001")["state"], "NORMAL")
+
+    def test_policy_migration_lowers_quota_preserves_progress(self):
+        for _ in range(3): self.fail()
+        data = mod.load(self.path)
+        d = data["agents"]["agent"]["detentions"][0]
+        d["practice_quota"] = 100
+        d["practice_passes"] = 32
+        mod.save(self.path, data)
+        result = mod.migrate_policy(self.path)
+        d = mod.status(self.path, "agent")["detentions"][0]
+        self.assertEqual(result["practice_quota"], 50)
+        self.assertEqual(d["practice_quota"], 50)
+        self.assertEqual(d["practice_passes"], 32)
 
     def test_atomic_state_is_valid_json(self):
         self.fail(); data = json.loads(self.path.read_text())

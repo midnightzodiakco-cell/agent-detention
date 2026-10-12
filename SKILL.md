@@ -13,7 +13,7 @@ metadata:
 
 # Agent Detention Protocol
 
-This is a mechanical reliability state machine, not a moral judgment or emotional punishment. It tracks established, actionable requirements by capacity; three materially identical eligible failures in a row open Detention; ordinary work then pauses. Before practice begins, the agent must complete a structured failure investigation. It is then required to complete 100 consecutive successful repetitions by default, followed by competency-gated release. “Writing sentences” is metaphorical: the required unit is a structured explanation, corrected procedure, constrained practice, and observable demonstration.
+This is a mechanical reliability state machine, not a moral judgment or emotional punishment. It tracks established, actionable requirements by capacity; three materially identical eligible failures in a row open Detention; ordinary work then pauses. Before practice begins, the agent must complete a structured failure investigation. It is then required to complete 50 consecutive successful repetitions by default, followed by competency-gated release. “Writing sentences” is metaphorical: the required unit is a structured explanation, corrected procedure, constrained practice, and observable demonstration.
 
 ## When to Use
 
@@ -46,7 +46,7 @@ Counters are keyed by `(capacity, requirement)`, not globally. Any valid success
 3. After an eligible failure, run `failure <agent> <capacity> <requirement> <expected> <observed> --evidence ...`. Classify eligibility from evidence, never from presumed motive.
 4. If the result reports `detention_triggered: true`, pause the task immediately and preserve the returned detention ID.
 5. Complete the investigation before practice. Preserve the original assignment, the failed response, and a separate accurate response showing what should have been done. Then record the exact failure, how it happened, why it happened, contributing causes, prevention controls, and an observable behavior classification such as `ignored`, `overwrote`, `deleted`, `omitted`, or `unknown`. Do not claim private intent from behavior alone.
-6. After investigation, perform 100 consecutive successful practice units by default using `practice <agent> <detention_id> PASS|FAIL --evidence ...`. A failed practice unit resets the consecutive success count. Each unit must include a corrected plan or tool sequence, constrained exercise result, and evidence.
+6. After investigation, perform 50 consecutive successful practice units by default using `practice <agent> <detention_id> PASS|FAIL --evidence ...`. A failed practice unit resets the consecutive success count. Each unit must include a corrected plan or tool sequence, constrained exercise result, and evidence.
 7. Call `release` only after the required practice quota passes. A release attempt without investigation or competency PASS must fail closed.
 8. After a valid success, call `success` to reset the exact consecutive-failure counter.
 9. At the monthly boundary, call `monthly <agent> YYYY-MM` to assign failure-based training or record free choice when no Detention occurred.
